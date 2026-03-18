@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BETRESEARCH Architecture - Feature Engineering & Model Training</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 40px;
+            border-left: 4px solid #0066cc;
+            padding-left: 15px;
+        }
+        .diagram-container {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .description {
+            background: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .performance-box {
+            background: #fff4e1;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff9800;
+        }
+        .performance-box h3 {
+            margin-top: 0;
+            color: #e65100;
+        }
+        .mermaid {
+            text-align: center;
+        }
+        .nav {
+            background: white;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav a {
+            color: #0066cc;
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: 500;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #0066cc;
+            color: white;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="index.html">← Home</a>
+        <a href="bethub_architecture.html">BETHUB</a>
+        <a href="betresearch_architecture.html">BETRESEARCH</a>
+        <a href="betbot_architecture.html">BETBOT API</a>
+        <a href="bettracker_architecture.html">BETTRACKER</a>
+    </div>
+
+    <h1>BETRESEARCH - Feature Engineering & Model Training Architecture</h1>
+
+    <div class="performance-box">
+        <h3>🎯 Research Platform Highlights</h3>
+        <p><strong>Feature Count:</strong> 93 engineered features</p>
+        <p><strong>Algorithms:</strong> 7 ML frameworks (XGBoost, CatBoost, LightGBM, TensorFlow, etc.)</p>
+        <p><strong>Training Time:</strong> 5-10 minutes per model</p>
+        <p><strong>Experiments:</strong> 12+ specialized approaches</p>
+    </div>
+
+    <h2>Complete Research Pipeline</h2>
+    <div class="description">
+        <strong>Overview:</strong> BETRESEARCH transforms 850K+ raw match records into ML-ready features, trains multiple models, evaluates performance, and produces versioned artifacts for production deployment.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    A[Raw Data from MongoDB] --> B[Data Quality Layer]
+    B --> C[Temporal Validation]
+    C --> D[Feature Engineering]
+    D --> E[Feature Store]
+
+    E --> F[Model Training]
+    F --> G[Hyperparameter Tuning]
+    G --> H[Model Evaluation]
+    H --> I{Performance<br/>Acceptable?}
+
+    I -->|No| F
+    I -->|Yes| J[Model Artifacts]
+    J --> K[Versioning System]
+    K --> L[Production Deployment]
+
+    style B fill:#ffe1e1
+    style C fill:#e1ffe1
+    style D fill:#e1f5ff
+    style H fill:#fff4e1
+    style J fill:#e1f0ff
+        </div>
+    </div>
+
+    <h2>Feature Engineering Pipeline</h2>
+    <div class="description">
+        <strong>Key Innovation:</strong> 93 features across 4 categories with strict temporal constraints preventing data leakage. All features use only data available before prediction time.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart LR
+    A[Raw Match Data] --> B[Data Quality Checks]
+
+    B --> C1[Rolling Statistics]
+    B --> C2[Team Performance]
+    B --> C3[Market Indicators]
+    B --> C4[Temporal Patterns]
+
+    C1 --> D1[20 Features]
+    C2 --> D2[32 Features]
+    C3 --> D3[16 Features]
+    C4 --> D4[25 Features]
+
+    D1 --> E[Feature Matrix<br/>93 Features]
+    D2 --> E
+    D3 --> E
+    D4 --> E
+
+    E --> F[Temporal Validation]
+    F --> G[ML Ready Dataset]
+
+    style B fill:#ffe1e1
+    style E fill:#e1f5ff
+    style F fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>Feature Categories Breakdown</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    subgraph "Rolling Draw Percentages (20)"
+        A1[5-Game Windows]
+        A2[10-Game Windows]
+        A3[15-Game Windows]
+        A4[20-Game Windows]
+        A5[Home/Away Splits]
+    end
+
+    subgraph "Win/Loss Patterns (32)"
+        B1[Win Percentages]
+        B2[Loss Percentages]
+        B3[Home/Away Venue]
+        B4[Form Trends]
+        B5[Head-to-Head]
+    end
+
+    subgraph "Goal Statistics (16)"
+        C1[Rolling Goal Averages]
+        C2[Goal Totals]
+        C3[Home/Away Goals]
+        C4[Defensive Metrics]
+    end
+
+    subgraph "Momentum Indicators (25)"
+        D1[Draw Trend Differentials]
+        D2[Goal Trend Comparisons]
+        D3[Momentum Indexes]
+        D4[Win/Loss Gaps]
+    end
+
+    A1 --> E[Feature Matrix]
+    A2 --> E
+    A3 --> E
+    A4 --> E
+    A5 --> E
+    B1 --> E
+    B2 --> E
+    B3 --> E
+    B4 --> E
+    B5 --> E
+    C1 --> E
+    C2 --> E
+    C3 --> E
+    C4 --> E
+    D1 --> E
+    D2 --> E
+    D3 --> E
+    D4 --> E
+
+    E --> F[93 Total Features]
+
+    style E fill:#e1f5ff
+    style F fill:#4caf50,color:#fff
+        </div>
+    </div>
+
+    <h2>Data Quality Layer</h2>
+    <div class="description">
+        <strong>Robust Validation:</strong> 5+ checks ensure data integrity before feature engineering, preventing garbage in/garbage out scenarios.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart TD
+    A[Raw Data Input] --> B{Deduplication}
+    B -->|Duplicates Found| C[Remove/Merge]
+    B -->|Clean| D{Missing Values}
+
+    C --> D
+    D -->|>10% Missing| E[Drop Column]
+    D -->|<10% Missing| F[Imputation Strategy]
+    D -->|Complete| G{Outlier Detection}
+
+    F --> G
+    G -->|3σ Outliers| H[Cap/Winsorize]
+    G -->|Normal Range| I{League Alias Resolution}
+
+    H --> I
+    I -->|Multiple Names| J[Standardize League IDs]
+    I -->|Unique| K{Temporal Consistency}
+
+    J --> K
+    K -->|Date Errors| L[Fix Timestamps]
+    K -->|Valid| M[Clean Dataset]
+
+    L --> M
+
+    style C fill:#ffe1e1
+    style E fill:#ffe1e1
+    style M fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>Model Training Workflow</h2>
+    <div class="description">
+        <strong>Multi-Algorithm Approach:</strong> Train 7 different algorithms with hyperparameter tuning, evaluate performance, and select best performer per market.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+sequenceDiagram
+    participant Config as YAML Config
+    participant Data as Feature Store
+    participant Train as Training Engine
+    participant Models as 7 Algorithms
+    participant Eval as Evaluator
+    participant Store as Artifact Store
+
+    Config->>Train: Load hyperparameters
+    Data->>Train: Fetch train/val splits
+
+    par XGBoost Training
+        Train->>Models: XGBoost
+        Models->>Eval: Model + Metrics
+    and CatBoost Training
+        Train->>Models: CatBoost
+        Models->>Eval: Model + Metrics
+    and LightGBM Training
+        Train->>Models: LightGBM
+        Models->>Eval: Model + Metrics
+    and Neural Network Training
+        Train->>Models: TensorFlow
+        Models->>Eval: Model + Metrics
+    and Scikit-learn Training
+        Train->>Models: Random Forest
+        Models->>Eval: Model + Metrics
+    end
+
+    Eval->>Eval: Compare ROC AUC
+    Eval->>Eval: Check precision/recall
+    Eval->>Store: Save best model
+    Store->>Store: Version metadata
+
+    Note over Eval,Store: Total training: 5-10 minutes
+        </div>
+    </div>
+
+    <h2>Hyperparameter Tuning Strategy</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart LR
+    A[YAML Config] --> B[Parameter Grid]
+
+    B --> C1[Learning Rate]
+    B --> C2[Max Depth]
+    B --> C3[N Estimators]
+    B --> C4[Regularization]
+
+    C1 --> D[Grid Search / Random Search]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+
+    D --> E[Cross-Validation]
+    E --> F{Best Params?}
+
+    F -->|Continue| D
+    F -->|Found| G[Optimal Config]
+
+    G --> H[Train Final Model]
+    H --> I[Validation Metrics]
+
+    style B fill:#e1f5ff
+    style G fill:#e1ffe1
+    style I fill:#fff4e1
+        </div>
+    </div>
+
+    <h2>Class Imbalance Handling</h2>
+    <div class="description">
+        <strong>Rare Event Prediction:</strong> Draws are minority class (~25% of matches). Multiple strategies handle imbalance without artificial data generation.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    A[Training Data] --> B{Class Distribution}
+    B --> C[Majority: Win/Loss 75%]
+    B --> D[Minority: Draw 25%]
+
+    C --> E[Strategy Selection]
+    D --> E
+
+    E --> F1[Focal Loss<br/>Neural Networks]
+    E --> F2[Balanced Class Weights<br/>Tree Models]
+    E --> F3[SMOTE Oversampling<br/>Experimental]
+
+    F1 --> G[Trained Model]
+    F2 --> G
+    F3 --> G
+
+    G --> H{Calibration Check}
+    H -->|Well Calibrated| I[Deploy]
+    H -->|Miscalibrated| J[Platt Scaling]
+    J --> I
+
+    style D fill:#ffe1e1
+    style E fill:#fff4e1
+    style I fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>Model Evaluation Framework</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart TD
+    A[Trained Model] --> B[Validation Set]
+    B --> C[Generate Predictions]
+
+    C --> D1[ROC AUC Score]
+    C --> D2[Precision/Recall]
+    C --> D3[F1 Score]
+    C --> D4[Confusion Matrix]
+    C --> D5[Calibration Plot]
+
+    D1 --> E{Meets Thresholds?}
+    D2 --> E
+    D3 --> E
+    D4 --> E
+    D5 --> E
+
+    E -->|ROC AUC < 0.55| F[Reject Model]
+    E -->|Precision < 30%| F
+    E -->|Poor Calibration| F
+    E -->|All Pass| G[Accept Model]
+
+    F --> H[Retrain with New Config]
+    H --> A
+
+    G --> I[Production Candidate]
+    I --> J[Version + Metadata]
+    J --> K[Artifact Store]
+
+    style E fill:#fff4e1
+    style F fill:#ffe1e1
+    style G fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>Model Artifacts & Versioning</h2>
+    <div class="description">
+        <strong>Production Ready:</strong> Each model artifact includes binary, metadata, feature names, training metrics, and git commit hash for reproducibility.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph LR
+    A[Trained Model] --> B[Serialization]
+
+    B --> C1[Model Binary<br/>pickle/joblib]
+    B --> C2[Feature Metadata<br/>names + importance]
+    B --> C3[Training Metrics<br/>ROC AUC, precision]
+    B --> C4[Version Info<br/>timestamp + git hash]
+    B --> C5[Config Snapshot<br/>YAML copy]
+
+    C1 --> D[Artifact Bundle]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+    C5 --> D
+
+    D --> E[Artifact Store]
+    E --> F[Production Deployment]
+
+    style D fill:#e1f5ff
+    style E fill:#fff4e1
+    style F fill:#4caf50,color:#fff
+        </div>
+    </div>
+
+    <h2>Configuration-Driven Design</h2>
+    <div class="diagram-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Config Section</th>
+                    <th>Purpose</th>
+                    <th>Example</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>model</strong></td>
+                    <td>Algorithm selection & hyperparameters</td>
+                    <td>algorithm: xgboost, max_depth: 6</td>
+                </tr>
+                <tr>
+                    <td><strong>features</strong></td>
+                    <td>Feature engineering configuration</td>
+                    <td>rolling_windows: [5, 10, 20]</td>
+                </tr>
+                <tr>
+                    <td><strong>validation</strong></td>
+                    <td>Walk-forward parameters</td>
+                    <td>calibration_window_days: 180</td>
+                </tr>
+                <tr>
+                    <td><strong>data</strong></td>
+                    <td>Data source & filtering</td>
+                    <td>min_samples: 100, leagues: [...]</td>
+                </tr>
+                <tr>
+                    <td><strong>training</strong></td>
+                    <td>Training parameters</td>
+                    <td>test_size: 0.2, random_state: 42</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Technology Stack</h2>
+    <div class="diagram-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Layer</th>
+                    <th>Technology</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Data Processing</strong></td>
+                    <td>Pandas, NumPy</td>
+                    <td>Feature engineering, data manipulation</td>
+                </tr>
+                <tr>
+                    <td><strong>Tree Models</strong></td>
+                    <td>XGBoost, CatBoost, LightGBM</td>
+                    <td>Gradient boosting algorithms</td>
+                </tr>
+                <tr>
+                    <td><strong>Neural Networks</strong></td>
+                    <td>TensorFlow, Keras</td>
+                    <td>Deep learning experiments</td>
+                </tr>
+                <tr>
+                    <td><strong>Scikit-learn</strong></td>
+                    <td>Random Forest, Logistic Regression</td>
+                    <td>Baseline models, preprocessing</td>
+                </tr>
+                <tr>
+                    <td><strong>Configuration</strong></td>
+                    <td>YAML</td>
+                    <td>Experiment management</td>
+                </tr>
+                <tr>
+                    <td><strong>Notebooks</strong></td>
+                    <td>Jupyter</td>
+                    <td>Interactive research & visualization</td>
+                </tr>
+                <tr>
+                    <td><strong>Version Control</strong></td>
+                    <td>Git</td>
+                    <td>Code + experiment tracking</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Research Workflow</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart LR
+    A[Research Question] --> B[Hypothesis]
+    B --> C[Update Config]
+    C --> D[Run Experiment]
+    D --> E[Analyze Results]
+    E --> F{Improvement?}
+
+    F -->|Yes| G[Save Config]
+    F -->|No| H[Document Learnings]
+
+    G --> I[Production Candidate]
+    H --> J[Try New Approach]
+    J --> B
+
+    I --> K[A/B Test]
+    K --> L{Better than Baseline?}
+
+    L -->|Yes| M[Deploy to Production]
+    L -->|No| N[Keep Baseline]
+
+    style F fill:#fff4e1
+    style L fill:#fff4e1
+    style M fill:#4caf50,color:#fff
+        </div>
+    </div>
+
+    <h2>Key Features</h2>
+    <div class="performance-box">
+        <h3>✨ BETRESEARCH Capabilities</h3>
+        <ul style="line-height: 1.8;">
+            <li><strong>93 Features</strong> - Comprehensive feature engineering across 4 categories</li>
+            <li><strong>7 Algorithms</strong> - Multi-framework approach with automatic selection</li>
+            <li><strong>Configuration-Driven</strong> - Rapid experimentation without code changes</li>
+            <li><strong>Temporal Safety</strong> - No data leakage, strict chronological ordering</li>
+            <li><strong>Class Imbalance Handling</strong> - Focal loss, balanced weights, SMOTE</li>
+            <li><strong>Hyperparameter Tuning</strong> - Grid search and random search support</li>
+            <li><strong>Model Versioning</strong> - Complete reproducibility with git integration</li>
+            <li><strong>Jupyter Integration</strong> - Interactive research and visualization</li>
+        </ul>
+    </div>
+
+    <style>
+        .copyright-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 12px;
+            z-index: 10000;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+    <div class="copyright-footer">
+        © 2026 BETUP_SCIENTIFIC. All Rights Reserved. | Proprietary and Confidential | Portfolio Demonstration Only
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                useMaxWidth: true
+            }
+        });
+    </script>
+</body>
+</html>

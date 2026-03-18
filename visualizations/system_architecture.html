@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture - BETUP_SCIENTIFIC</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 40px;
+            border-left: 4px solid #0066cc;
+            padding-left: 15px;
+        }
+        .diagram-container {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .description {
+            background: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .mermaid {
+            text-align: center;
+        }
+        .nav {
+            background: white;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav a {
+            color: #0066cc;
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: 500;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="index.html">← Home</a>
+        <a href="system_architecture.html">System Architecture</a>
+        <a href="walk_forward_validation.html">Walk-Forward Validation</a>
+        <a href="data_flow.html">Data Flow</a>
+    </div>
+
+    <h1>System Architecture Visualizations</h1>
+
+    <h2>Complete 4-Service Architecture</h2>
+    <div class="description">
+        <strong>Overview:</strong> This diagram shows how all four services interact in the BETUP_SCIENTIFIC system. Data flows from web sources through collection, research, production inference, and finally to analytics.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    subgraph "Data Collection Layer"
+        A[Web Sources] -->|Async Scraping| B[BETHUB Service]
+        B -->|ETL Pipeline| C[MongoDB Raw Data]
+    end
+
+    subgraph "Research & Training Layer"
+        C -->|Feature Engineering| D[BETRESEARCH Platform]
+        D -->|35+ Features| E[ML Training Pipeline]
+        E -->|7 Algorithms| F[Model Artifacts]
+    end
+
+    subgraph "Production Inference Layer"
+        F -->|Model Loading| G[BETBOT API Service]
+        C -->|Real-time Data| G
+        G -->|Walk-Forward Validation| H[Dynamic Thresholds]
+        H -->|Predictions| I[REST API Endpoints]
+    end
+
+    subgraph "Analytics & Monitoring Layer"
+        I -->|Performance Data| J[BETTRACKER Platform]
+        J -->|Campaign Management| K[ROI Analytics]
+        K -->|Feedback Loop| E
+    end
+
+    style B fill:#e1f5ff
+    style E fill:#fff4e1
+    style G fill:#e1ffe1
+    style J fill:#ffe1f5
+        </div>
+    </div>
+
+    <h2>Data Flow Architecture</h2>
+    <div class="description">
+        <strong>Overview:</strong> This shows the end-to-end data pipeline from raw sources through processing, feature engineering, model training, and deployment.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart LR
+    A[Web Sources] -->|Async Scraping| B[Raw Data Layer]
+    B -->|Deduplication| C[Clean Data Layer]
+    C -->|Feature Engineering| D[Feature Store]
+    D -->|Training| E[Model Artifacts]
+    D -->|Real-time| F[Inference Service]
+    E -->|Model Loading| F
+    F -->|Walk-Forward| G[Predictions]
+    G -->|Analytics| H[Performance DB]
+    H -->|Feedback| E
+
+    style B fill:#e1f5ff
+    style D fill:#fff4e1
+    style E fill:#e1ffe1
+    style F fill:#ffe1e1
+        </div>
+    </div>
+
+    <h2>Feature Engineering Pipeline</h2>
+    <div class="description">
+        <strong>Overview:</strong> Shows how raw match data is transformed into 35+ features across multiple categories, with temporal validation to prevent data leakage.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph LR
+    A[Raw Match Data] --> B[Data Quality Layer]
+    B --> C[Temporal Features]
+    B --> D[Team Performance]
+    B --> E[Market Indicators]
+
+    C --> F[Rolling Statistics]
+    D --> G[Form Metrics]
+    E --> H[Expected Goals]
+
+    F --> I[Feature Matrix]
+    G --> I
+    H --> I
+
+    I --> J[Temporal Validation]
+    J --> K[ML Ready Dataset]
+
+    style B fill:#ffe1e1
+    style J fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>Multi-Model Production Architecture</h2>
+    <div class="description">
+        <strong>Overview:</strong> Production inference routes requests to different models based on market category, with dynamic threshold optimization for each prediction.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    A[Incoming Request] --> B{Route by Market}
+
+    B -->|Market A| C[Model 1]
+    B -->|Market B| D[Model 2]
+    B -->|Market C| E[Model 3]
+    B -->|Default| F[Fallback Model]
+
+    C --> G[Threshold Optimizer A]
+    D --> H[Threshold Optimizer B]
+    E --> I[Threshold Optimizer C]
+    F --> J[Threshold Optimizer Default]
+
+    G --> K[Prediction + Confidence]
+    H --> K
+    I --> K
+    J --> K
+
+    K --> L[API Response <500ms]
+
+    style B fill:#fff4e1
+    style G fill:#e1f5ff
+    style H fill:#e1f5ff
+    style I fill:#e1f5ff
+    style J fill:#e1f5ff
+        </div>
+    </div>
+
+    <h2>ROI Performance Attribution</h2>
+    <div class="description">
+        <strong>Overview:</strong> Pie chart showing how different market segments contribute to overall ROI. Top 20% of markets achieve 2,000% ROI.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+pie title ROI by Market Type
+    "Top 20% Markets" : 2000
+    "Middle 60% Markets" : 1200
+    "Bottom 20% Markets" : 400
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+
+    <style>
+        .copyright-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 12px;
+            z-index: 10000;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+    <div class="copyright-footer">
+        © 2026 BETUP_SCIENTIFIC. All Rights Reserved. | Proprietary and Confidential | Portfolio Demonstration Only
+    </div>
+</body>
+
+</html>

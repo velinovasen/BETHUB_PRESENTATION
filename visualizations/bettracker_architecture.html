@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BETTRACKER Architecture - Analytics & Campaign Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 40px;
+            border-left: 4px solid #0066cc;
+            padding-left: 15px;
+        }
+        .diagram-container {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .description {
+            background: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .performance-box {
+            background: #ffe1f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #e91e63;
+        }
+        .performance-box h3 {
+            margin-top: 0;
+            color: #880e4f;
+        }
+        .mermaid {
+            text-align: center;
+        }
+        .nav {
+            background: white;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav a {
+            color: #0066cc;
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: 500;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #0066cc;
+            color: white;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="index.html">← Home</a>
+        <a href="bethub_architecture.html">BETHUB</a>
+        <a href="betresearch_architecture.html">BETRESEARCH</a>
+        <a href="betbot_architecture.html">BETBOT API</a>
+        <a href="bettracker_architecture.html">BETTRACKER</a>
+    </div>
+
+    <h1>BETTRACKER - Analytics & Campaign Management Platform</h1>
+
+    <div class="performance-box">
+        <h3>📊 Analytics Platform Highlights</h3>
+        <p><strong>Authentication:</strong> JWT + 2FA (TOTP) for secure access</p>
+        <p><strong>Campaign Modes:</strong> LIVE and SIMULATION tracking</p>
+        <p><strong>Performance Metrics:</strong> ROI, accuracy, streaks, calibration</p>
+        <p><strong>Integration:</strong> Real-time feedback loop to BETRESEARCH</p>
+    </div>
+
+    <h2>Complete Platform Architecture</h2>
+    <div class="description">
+        <strong>Overview:</strong> BETTRACKER provides comprehensive campaign management, performance attribution, and feedback loops for continuous model improvement.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    A[User Login] --> B[JWT Auth + 2FA]
+    B --> C[Campaign Dashboard]
+
+    C --> D[LIVE Campaigns]
+    C --> E[SIMULATION Campaigns]
+
+    D --> F[Real-time Predictions<br/>from BETBOT]
+    E --> G[Historical Backtests<br/>Walk-Forward]
+
+    F --> H[Performance Tracker]
+    G --> H
+
+    H --> I[Metrics Aggregator]
+    I --> J[ROI Calculator]
+    I --> K[Streak Analyzer]
+    I --> L[Attribution Engine]
+
+    J --> M[Visualizations]
+    K --> M
+    L --> M
+
+    M --> N[User Interface]
+
+    N --> O[Export Data]
+    O --> P[Feedback to BETRESEARCH]
+
+    style B fill:#ffe1e1
+    style H fill:#e1f5ff
+    style I fill:#fff4e1
+    style P fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>Authentication Flow</h2>
+    <div class="description">
+        <strong>Security:</strong> Multi-factor authentication with JWT tokens and TOTP-based 2FA ensures secure access to sensitive performance data.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+sequenceDiagram
+    participant User
+    participant Frontend as Frontend (JS)
+    participant API as BETTRACKER API
+    participant Auth as Auth Service
+    participant DB as MongoDB
+    participant TOTP as 2FA Provider
+
+    User->>Frontend: Enter credentials
+    Frontend->>API: POST /auth/login
+    API->>Auth: Validate credentials
+    Auth->>DB: Query user record
+
+    alt Invalid Credentials
+        DB->>Auth: User not found
+        Auth->>API: 401 Unauthorized
+        API->>Frontend: Login failed
+    else Valid Credentials
+        DB->>Auth: User found + hashed password
+        Auth->>Auth: Verify password hash
+        Auth->>API: Send 2FA prompt
+        API->>Frontend: Require 2FA code
+
+        User->>Frontend: Enter TOTP code
+        Frontend->>API: POST /auth/verify-2fa
+        API->>TOTP: Verify TOTP code
+        TOTP->>API: Code valid
+
+        API->>Auth: Generate JWT token
+        Auth->>API: Token + expiry
+        API->>Frontend: 200 OK + JWT
+
+        Frontend->>Frontend: Store token in localStorage
+        Frontend->>User: Redirect to dashboard
+    end
+
+    Note over User,DB: Session expires after 24 hours
+        </div>
+    </div>
+
+    <h2>Campaign Management Architecture</h2>
+    <div class="description">
+        <strong>Dual Mode System:</strong> LIVE mode tracks real-time predictions, while SIMULATION mode enables walk-forward backtesting without risking capital.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    A[User Creates Campaign] --> B{Campaign Type?}
+
+    B -->|LIVE| C[LIVE Campaign]
+    B -->|SIMULATION| D[SIMULATION Campaign]
+
+    C --> E[Real-time Mode]
+    D --> F[Backtest Mode]
+
+    E --> G[Monitor BETBOT Predictions]
+    F --> H[Historical Data Replay]
+
+    G --> I[Track Actual Outcomes]
+    H --> J[Walk-Forward Validation]
+
+    I --> K[Update Performance Metrics]
+    J --> K
+
+    K --> L[ROI Calculation]
+    K --> M[Accuracy Tracking]
+    K --> N[Streak Detection]
+    K --> O[Sample Size Validation]
+
+    L --> P[Campaign Dashboard]
+    M --> P
+    N --> P
+    O --> P
+
+    style C fill:#e1ffe1
+    style D fill:#fff4e1
+    style K fill:#e1f5ff
+        </div>
+    </div>
+
+    <h2>Performance Metrics Tracking</h2>
+    <div class="description">
+        <strong>Comprehensive Analytics:</strong> Track ROI, accuracy, streaks, coverage, and calibration across all campaigns with per-market attribution.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart TD
+    A[Prediction Logged] --> B[Metrics Engine]
+
+    B --> C1[ROI Metrics]
+    B --> C2[Accuracy Metrics]
+    B --> C3[Streak Metrics]
+    B --> C4[Coverage Metrics]
+    B --> C5[Calibration Metrics]
+
+    C1 --> D1[Per-Campaign ROI]
+    C1 --> D2[Per-Market ROI]
+    C1 --> D3[Cumulative ROI]
+
+    C2 --> E1[Overall Accuracy]
+    C2 --> E2[Per-Market Accuracy]
+    C2 --> E3[Precision/Recall]
+
+    C3 --> F1[Winning Streaks]
+    C3 --> F2[Losing Streaks]
+    C3 --> F3[Current Streak]
+
+    C4 --> G1[Prediction Volume]
+    C4 --> G2[Prediction Rate]
+    C4 --> G3[Market Coverage]
+
+    C5 --> H1[Confidence vs Actual]
+    C5 --> H2[Calibration Plot]
+    C5 --> H3[Brier Score]
+
+    D1 --> I[Aggregated Dashboard]
+    D2 --> I
+    D3 --> I
+    E1 --> I
+    E2 --> I
+    E3 --> I
+    F1 --> I
+    F2 --> I
+    F3 --> I
+    G1 --> I
+    G2 --> I
+    G3 --> I
+    H1 --> I
+    H2 --> I
+    H3 --> I
+
+    style B fill:#e1f5ff
+    style I fill:#4caf50,color:#fff
+        </div>
+    </div>
+
+    <h2>ROI Calculation Engine</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart LR
+    A[Prediction + Outcome] --> B[ROI Calculator]
+
+    B --> C{Prediction Correct?}
+
+    C -->|Yes - Win| D[Profit = Stake × Odds]
+    C -->|No - Loss| E[Loss = -Stake]
+
+    D --> F[Update Bankroll]
+    E --> F
+
+    F --> G[Calculate Metrics]
+
+    G --> H1[Cumulative ROI]
+    G --> H2[Win Rate]
+    G --> H3[Average Profit]
+    G --> H4[Sharpe Ratio]
+
+    H1 --> I[Dashboard Display]
+    H2 --> I
+    H3 --> I
+    H4 --> I
+
+    style C fill:#fff4e1
+    style D fill:#e1ffe1
+    style E fill:#ffe1e1
+    style I fill:#e1f5ff
+        </div>
+    </div>
+
+    <h2>Bankroll Management Strategy</h2>
+    <div class="description">
+        <strong>Progressive Scaling:</strong> Kelly Criterion-inspired staking strategy scales bet sizes based on confidence and bankroll health.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    A[Prediction Confidence] --> B[Kelly Calculator]
+    C[Current Bankroll] --> B
+    D[Historical Win Rate] --> B
+
+    B --> E{Calculate Kelly %}
+
+    E --> F[Optimal Stake %]
+    F --> G{Apply Constraints}
+
+    G -->|Too High| H[Cap at Max 5%]
+    G -->|Too Low| I[Floor at Min 1%]
+    G -->|Acceptable| J[Use Kelly %]
+
+    H --> K[Final Stake Size]
+    I --> K
+    J --> K
+
+    K --> L[Place Bet]
+    L --> M[Track Outcome]
+
+    M --> N{Bankroll Health Check}
+    N -->|Growing| O[Increase Position Sizes]
+    N -->|Declining| P[Reduce Position Sizes]
+    N -->|Stable| Q[Maintain Current Strategy]
+
+    style E fill:#fff4e1
+    style K fill:#e1f5ff
+    style N fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>Streak Detection & Alerting</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart TD
+    A[Prediction Outcome] --> B[Streak Tracker]
+
+    B --> C{Update Streak}
+
+    C -->|Win| D[Increment Win Streak]
+    C -->|Loss| E[Increment Loss Streak]
+
+    D --> F{Win Streak >= 10?}
+    E --> G{Loss Streak >= 5?}
+
+    F -->|Yes| H[Alert: Hot Streak]
+    F -->|No| I[Continue Tracking]
+
+    G -->|Yes| J[Alert: Cold Streak]
+    G -->|No| I
+
+    H --> K[Notify User]
+    J --> L[Notify User + Risk Warning]
+
+    K --> M[Dashboard Update]
+    L --> M
+
+    I --> M
+
+    style H fill:#e1ffe1
+    style J fill:#ffe1e1
+    style M fill:#e1f5ff
+        </div>
+    </div>
+
+    <h2>Per-Market Attribution</h2>
+    <div class="description">
+        <strong>Granular Analysis:</strong> Understand which markets drive performance and identify opportunities for optimization.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph LR
+    A[All Predictions] --> B[Group by Market]
+
+    B --> C1[Premier League]
+    B --> C2[Championship]
+    B --> C3[European Cups]
+    B --> C4[Other Leagues]
+
+    C1 --> D[Calculate Per-Market Metrics]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+
+    D --> E1[Market ROI]
+    D --> E2[Market Accuracy]
+    D --> E3[Sample Size]
+    D --> E4[Statistical Significance]
+
+    E1 --> F[Attribution Table]
+    E2 --> F
+    E3 --> F
+    E4 --> F
+
+    F --> G{Identify Patterns}
+
+    G -->|Strong Performance| H[Scale Up Market]
+    G -->|Weak Performance| I[Investigate or Reduce]
+    G -->|Insufficient Data| J[Continue Collecting]
+
+    style D fill:#e1f5ff
+    style F fill:#fff4e1
+    style H fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>Feedback Loop to Training</h2>
+    <div class="description">
+        <strong>Continuous Improvement:</strong> Production performance data feeds back to BETRESEARCH for model retraining and threshold recalibration.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+sequenceDiagram
+    participant Tracker as BETTRACKER
+    participant DB as MongoDB
+    participant Research as BETRESEARCH
+    participant Models as Model Training
+
+    loop Every 30 Days
+        Tracker->>DB: Query recent predictions
+        DB->>Tracker: Last 30 days data
+
+        Tracker->>Tracker: Calculate drift metrics
+        Tracker->>Tracker: Detect performance degradation
+
+        alt Performance Degraded
+            Tracker->>Research: Send retraining signal
+            Research->>DB: Fetch extended history
+            DB->>Research: Training dataset
+
+            Research->>Models: Retrain with new data
+            Models->>Models: Evaluate improvements
+            Models->>Research: New model artifacts
+
+            Research->>Tracker: Notify model updated
+        else Performance Stable
+            Tracker->>Research: Send calibration data
+            Research->>Research: Update threshold cache
+        end
+
+        Tracker->>Tracker: Log feedback cycle
+    end
+
+    Note over Tracker,Models: Continuous improvement loop
+        </div>
+    </div>
+
+    <h2>Campaign Dashboard Interface</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    A[User Dashboard] --> B[Campaign Overview]
+
+    B --> C1[Active Campaigns<br/>Cards]
+    B --> C2[Performance Charts<br/>ROI over time]
+    B --> C3[Metrics Summary<br/>Key numbers]
+
+    C1 --> D[Campaign Details View]
+
+    D --> E1[Prediction History Table]
+    D --> E2[ROI Line Chart]
+    D --> E3[Win/Loss Pie Chart]
+    D --> E4[Streak Indicator]
+    D --> E5[Market Breakdown]
+
+    E1 --> F[Interactive Filters]
+    E2 --> F
+    E3 --> F
+    E4 --> F
+    E5 --> F
+
+    F --> G[Date Range]
+    F --> H[Market Filter]
+    F --> I[Outcome Filter]
+
+    G --> J[Filtered View]
+    H --> J
+    I --> J
+
+    style A fill:#e1f5ff
+    style D fill:#fff4e1
+    style J fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>Real-time Updates Architecture</h2>
+    <div class="description">
+        <strong>Live Data Streaming:</strong> WebSocket connection enables real-time updates to campaign dashboards as predictions are made and outcomes are determined.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+sequenceDiagram
+    participant User as User Browser
+    participant WS as WebSocket Server
+    participant API as BETTRACKER API
+    participant BETBOT as BETBOT API
+    participant DB as MongoDB
+
+    User->>WS: Connect with JWT token
+    WS->>User: Connection established
+
+    loop Real-time Updates
+        BETBOT->>API: New prediction logged
+        API->>DB: Store prediction
+        DB->>API: Confirmation
+
+        API->>WS: Broadcast prediction event
+        WS->>User: Push update to browser
+
+        User->>User: Update dashboard (no refresh)
+
+        Note over User: Outcome determined later...
+
+        API->>DB: Poll for outcomes
+        DB->>API: Outcome available
+
+        API->>API: Recalculate metrics
+        API->>WS: Broadcast outcome event
+        WS->>User: Push metrics update
+
+        User->>User: Live metrics refresh
+    end
+
+    Note over User,DB: Zero page reloads, instant updates
+        </div>
+    </div>
+
+    <h2>Campaign Comparison Feature</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart LR
+    A[Select Campaigns] --> B[Campaign A Data]
+    A --> C[Campaign B Data]
+
+    B --> D[Comparison Engine]
+    C --> D
+
+    D --> E1[Side-by-Side ROI]
+    D --> E2[Accuracy Comparison]
+    D --> E3[Volume Comparison]
+    D --> E4[Risk Metrics]
+
+    E1 --> F[Statistical Tests]
+    E2 --> F
+    E3 --> F
+    E4 --> F
+
+    F --> G{Significantly Different?}
+
+    G -->|Yes| H[Highlight Winner]
+    G -->|No| I[Mark as Equivalent]
+
+    H --> J[Comparison Report]
+    I --> J
+
+    style D fill:#e1f5ff
+    style F fill:#fff4e1
+    style J fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>Data Export & Reporting</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    A[Export Request] --> B{Export Format}
+
+    B -->|CSV| C[Generate CSV]
+    B -->|JSON| D[Generate JSON]
+    B -->|PDF Report| E[Generate PDF]
+
+    C --> F[Query Data]
+    D --> F
+    E --> F
+
+    F --> G[MongoDB Aggregation]
+    G --> H[Format Data]
+
+    H --> I[Include Metadata]
+    I --> J[Campaign Info]
+    I --> K[Date Range]
+    I --> L[Performance Summary]
+
+    J --> M[Export File]
+    K --> M
+    L --> M
+
+    M --> N[Download to User]
+
+    style F fill:#e1f5ff
+    style M fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>Technology Stack</h2>
+    <div class="diagram-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Layer</th>
+                    <th>Technology</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Backend API</strong></td>
+                    <td>FastAPI</td>
+                    <td>RESTful API + WebSocket support</td>
+                </tr>
+                <tr>
+                    <td><strong>Frontend</strong></td>
+                    <td>Vanilla JavaScript</td>
+                    <td>No framework overhead, fast rendering</td>
+                </tr>
+                <tr>
+                    <td><strong>Authentication</strong></td>
+                    <td>JWT + TOTP (pyotp)</td>
+                    <td>Secure token-based auth + 2FA</td>
+                </tr>
+                <tr>
+                    <td><strong>Database</strong></td>
+                    <td>MongoDB</td>
+                    <td>Campaign and prediction storage</td>
+                </tr>
+                <tr>
+                    <td><strong>Real-time</strong></td>
+                    <td>WebSockets</td>
+                    <td>Live dashboard updates</td>
+                </tr>
+                <tr>
+                    <td><strong>Charting</strong></td>
+                    <td>Chart.js</td>
+                    <td>Interactive performance visualizations</td>
+                </tr>
+                <tr>
+                    <td><strong>Styling</strong></td>
+                    <td>CSS3</td>
+                    <td>Responsive design</td>
+                </tr>
+                <tr>
+                    <td><strong>Deployment</strong></td>
+                    <td>Docker</td>
+                    <td>Containerized deployment</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Metrics Dashboard Structure</h2>
+    <div class="diagram-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric Category</th>
+                    <th>Metrics Tracked</th>
+                    <th>Update Frequency</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>ROI Metrics</strong></td>
+                    <td>Total ROI, Per-Market ROI, Per-Campaign ROI</td>
+                    <td>Real-time on outcome</td>
+                </tr>
+                <tr>
+                    <td><strong>Accuracy Metrics</strong></td>
+                    <td>Overall Accuracy, Precision, Recall, F1 Score</td>
+                    <td>Real-time on outcome</td>
+                </tr>
+                <tr>
+                    <td><strong>Volume Metrics</strong></td>
+                    <td>Total Predictions, Prediction Rate, Market Coverage</td>
+                    <td>Real-time on prediction</td>
+                </tr>
+                <tr>
+                    <td><strong>Streak Metrics</strong></td>
+                    <td>Current Streak, Longest Win/Loss Streaks</td>
+                    <td>Real-time on outcome</td>
+                </tr>
+                <tr>
+                    <td><strong>Risk Metrics</strong></td>
+                    <td>Max Drawdown, Volatility, Sharpe Ratio</td>
+                    <td>Daily aggregation</td>
+                </tr>
+                <tr>
+                    <td><strong>Calibration Metrics</strong></td>
+                    <td>Brier Score, Calibration Plot, Confidence Gap</td>
+                    <td>Weekly aggregation</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Key Features</h2>
+    <div class="performance-box">
+        <h3>✨ BETTRACKER Capabilities</h3>
+        <ul style="line-height: 1.8;">
+            <li><strong>Dual Campaign Modes</strong> - LIVE tracking and SIMULATION backtesting</li>
+            <li><strong>JWT + 2FA Authentication</strong> - Secure access with TOTP-based 2FA</li>
+            <li><strong>Real-time WebSocket Updates</strong> - Instant dashboard refresh on new data</li>
+            <li><strong>Per-Market Attribution</strong> - Granular performance analysis by league</li>
+            <li><strong>ROI Calculation Engine</strong> - Comprehensive profitability tracking</li>
+            <li><strong>Streak Detection</strong> - Winning/losing streak alerts and monitoring</li>
+            <li><strong>Bankroll Management</strong> - Kelly Criterion-inspired position sizing</li>
+            <li><strong>Feedback Loop to Training</strong> - Continuous model improvement pipeline</li>
+            <li><strong>Campaign Comparison</strong> - Statistical comparison of strategies</li>
+            <li><strong>Export & Reporting</strong> - CSV, JSON, and PDF report generation</li>
+        </ul>
+    </div>
+
+    <style>
+        .copyright-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 12px;
+            z-index: 10000;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+    <div class="copyright-footer">
+        © 2026 BETUP_SCIENTIFIC. All Rights Reserved. | Proprietary and Confidential | Portfolio Demonstration Only
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                useMaxWidth: true
+            }
+        });
+    </script>
+</body>
+</html>

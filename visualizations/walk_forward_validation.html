@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walk-Forward Validation - BETUP_SCIENTIFIC</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 40px;
+            border-left: 4px solid #0066cc;
+            padding-left: 15px;
+        }
+        .diagram-container {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .description {
+            background: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .warning {
+            background: #fff3e0;
+            padding: 15px;
+            border-left: 4px solid #ff9800;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .mermaid {
+            text-align: center;
+        }
+        .nav {
+            background: white;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav a {
+            color: #0066cc;
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: 500;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        .key-insight {
+            background: #e8f5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+        }
+        .key-insight h3 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="index.html">← Home</a>
+        <a href="system_architecture.html">System Architecture</a>
+        <a href="walk_forward_validation.html">Walk-Forward Validation</a>
+        <a href="data_flow.html">Data Flow</a>
+    </div>
+
+    <h1>Walk-Forward Validation Methodology</h1>
+
+    <div class="key-insight">
+        <h3>🔑 Key Innovation</h3>
+        <p><strong>Walk-forward validation achieves 1,200% ROI with 42.15% accuracy in production</strong></p>
+        <p>Highly selective prediction rate (11.32%) ensures only high-confidence predictions are made, validated across 3,206 games in top performing markets.</p>
+    </div>
+
+    <h2>Walk-Forward Validation Process</h2>
+    <div class="description">
+        <strong>Core Principle:</strong> For each prediction at time T, only use data from times &lt; T for threshold optimization. This prevents look-ahead bias where the model "knows" future patterns.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+sequenceDiagram
+    participant Historical as Historical Data
+    participant Train as Training Window
+    participant Calibrate as Calibration Window
+    participant Predict as Prediction Point
+
+    Note over Historical,Predict: Time flows left to right →
+
+    Historical->>Train: Use past data for training
+    Train->>Calibrate: 150-365 day window
+    Calibrate->>Calibrate: Evaluate 101 threshold candidates
+    Calibrate->>Predict: Apply optimal threshold
+
+    Note over Calibrate: Only use data BEFORE prediction time
+    Note over Predict: Never use future data
+
+    Predict->>Calibrate: Roll forward to next prediction
+    Calibrate->>Calibrate: Recalibrate thresholds
+        </div>
+    </div>
+
+    <h2>Walk-Forward vs Standard Backtesting</h2>
+    <div class="warning">
+        <strong>Problem with Standard Backtesting:</strong> It uses ALL data (including future) to find the "optimal" threshold, then applies it to historical predictions. This creates look-ahead bias.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+gantt
+    title Threshold Optimization: Standard vs Walk-Forward
+    dateFormat YYYY-MM-DD
+    section Standard (Biased)
+    Use ALL data (past + future): done, std1, 2020-01-01, 2021-12-31
+    Apply threshold to 2020-06-15 prediction: crit, std2, 2020-06-15, 1d
+    section Walk-Forward (Unbiased)
+    Use only data before 2020-06-15: done, wf1, 2020-01-01, 2020-06-14
+    Apply threshold to 2020-06-15 prediction: active, wf2, 2020-06-15, 1d
+        </div>
+    </div>
+
+    <h2>Production Performance Metrics</h2>
+    <div class="description">
+        <strong>Result:</strong> Walk-forward validation with dynamic threshold optimization achieves strong performance while preventing overfitting through temporal awareness.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    A[Walk-Forward Validation] --> B[Dynamic Threshold<br/>Optimization]
+    B --> C[Selective Predictions<br/>11.32% rate]
+    C --> D[Production Results]
+
+    D --> E[1200% ROI]
+    D --> F[42.15% Accuracy]
+    D --> G[363/3206 Games]
+
+    E --> H[High Confidence Only]
+    F --> H
+    G --> H
+
+    style A fill:#e1ffe1
+    style B fill:#e1f5ff
+    style D fill:#fff4e1
+    style H fill:#e8f5e9
+        </div>
+    </div>
+
+    <h2>Walk-Forward Algorithm Flowchart</h2>
+    <div class="description">
+        <strong>Step-by-step:</strong> This shows the complete algorithm for walk-forward validation with dynamic threshold optimization.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart TD
+    A[Start] --> B[Sort all predictions chronologically]
+    B --> C[Initialize: i = 0]
+    C --> D{i < N predictions?}
+
+    D -->|Yes| E[Get prediction i at time T_i]
+    E --> F[Extract calibration window:<br/>All data from times < T_i<br/>within lookback period]
+
+    F --> G{Enough<br/>calibration<br/>data?}
+
+    G -->|No| H[Skip prediction i]
+    G -->|Yes| I[Optimize threshold using<br/>only calibration data]
+
+    I --> J[Apply optimized threshold<br/>to prediction i]
+    J --> K[Record: prediction, threshold,<br/>window size]
+
+    H --> L[i = i + 1]
+    K --> L
+    L --> D
+
+    D -->|No| M[Calculate aggregate metrics<br/>across all predictions]
+    M --> N[End]
+
+    style F fill:#e1f5ff
+    style I fill:#fff4e1
+    style J fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>Production Performance Results</h2>
+    <div class="key-insight">
+        <h3>📊 Walk-Forward Validated Metrics</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+            <thead>
+                <tr style="background: #2e7d32; color: white;">
+                    <th style="padding: 10px; text-align: left;">Metric</th>
+                    <th style="padding: 10px; text-align: right;">Value</th>
+                    <th style="padding: 10px; text-align: left;">Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="background: #f5f5f5;">
+                    <td style="padding: 10px;"><strong>ROI</strong></td>
+                    <td style="padding: 10px; text-align: right;"><strong>1,200%</strong></td>
+                    <td style="padding: 10px;">Top performing production markets</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;"><strong>Accuracy</strong></td>
+                    <td style="padding: 10px; text-align: right;">42.15%</td>
+                    <td style="padding: 10px;">153 correct out of 363 predictions</td>
+                </tr>
+                <tr style="background: #f5f5f5;">
+                    <td style="padding: 10px;"><strong>Games Evaluated</strong></td>
+                    <td style="padding: 10px; text-align: right;">3,206</td>
+                    <td style="padding: 10px;">Across 9 top production leagues</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;"><strong>Predictions Made</strong></td>
+                    <td style="padding: 10px; text-align: right;">363</td>
+                    <td style="padding: 10px;">Highly selective prediction rate</td>
+                </tr>
+                <tr style="background: #f5f5f5;">
+                    <td style="padding: 10px;"><strong>Prediction Rate</strong></td>
+                    <td style="padding: 10px; text-align: right;">11.32%</td>
+                    <td style="padding: 10px;">Only high-confidence predictions</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;"><strong>Features Used</strong></td>
+                    <td style="padding: 10px; text-align: right;">93</td>
+                    <td style="padding: 10px;">Multi-window rolling statistics</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="margin-top: 15px;"><strong>Key Insight:</strong> Walk-forward validation prevents overfitting while maintaining strong performance. The highly selective prediction rate (11.32%) demonstrates the system only makes predictions when confidence is sufficiently high, leading to superior accuracy and ROI.</p>
+    </div>
+
+    <h2>Why This Matters</h2>
+    <div class="description">
+        <ul style="line-height: 1.8;">
+            <li><strong>Systematic Trading:</strong> Walk-forward validation is the industry standard for backtesting trading strategies</li>
+            <li><strong>Risk Management:</strong> Prevents deploying strategies with inflated performance expectations</li>
+            <li><strong>Scientific Rigor:</strong> Ensures results are reproducible and honest</li>
+            <li><strong>Capital Allocation:</strong> Makes informed decisions based on realistic performance estimates</li>
+        </ul>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            sequence: {
+                useMaxWidth: true,
+                showSequenceNumbers: false
+            },
+            gantt: {
+                useMaxWidth: true
+            }
+        });
+    </script>
+
+    <style>
+        .copyright-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 12px;
+            z-index: 10000;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+    <div class="copyright-footer">
+        © 2026 BETUP_SCIENTIFIC. All Rights Reserved. | Proprietary and Confidential | Portfolio Demonstration Only
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Flow - BETUP_SCIENTIFIC</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 40px;
+            border-left: 4px solid #0066cc;
+            padding-left: 15px;
+        }
+        .diagram-container {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .description {
+            background: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .mermaid {
+            text-align: center;
+        }
+        .nav {
+            background: white;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav a {
+            color: #0066cc;
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: 500;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="index.html">← Home</a>
+        <a href="system_architecture.html">System Architecture</a>
+        <a href="walk_forward_validation.html">Walk-Forward Validation</a>
+        <a href="data_flow.html">Data Flow</a>
+    </div>
+
+    <h1>Data Flow Visualizations</h1>
+
+    <h2>End-to-End Prediction Pipeline</h2>
+    <div class="description">
+        <strong>Overview:</strong> This sequence diagram shows the complete flow of a single prediction request through the BETBOT API, including model routing, threshold optimization, and analytics logging. <strong>Total latency: &lt;500ms</strong>
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+sequenceDiagram
+    participant User
+    participant API as BETBOT API
+    participant Router as Model Router
+    participant Model as ML Model
+    participant Threshold as Threshold Optimizer
+    participant DB as MongoDB
+    participant Tracker as BETTRACKER
+
+    User->>API: POST /predict {entity_id, features}
+    API->>Router: Route by category
+    Router->>Model: Load appropriate model
+    Router->>DB: Fetch historical predictions
+    DB->>Threshold: Past 180 days data
+    Threshold->>Threshold: Optimize threshold
+    Threshold->>Router: Optimal threshold = 0.42
+
+    Router->>Model: predict_proba(features)
+    Model->>Router: score = 0.58
+    Router->>Router: 0.58 >= 0.42 → Prediction = 1
+    Router->>API: Response bundle
+
+    API->>User: {prediction: 1, confidence: 0.58, threshold: 0.42}
+
+    API->>Tracker: Log prediction for analytics
+    Tracker->>DB: Store in performance_log
+
+    Note over User,DB: Total latency < 500ms
+        </div>
+    </div>
+
+    <h2>Training to Deployment Pipeline</h2>
+    <div class="description">
+        <strong>Overview:</strong> Shows the complete lifecycle from new data collection through training, evaluation, and deployment to production with feedback loops.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart LR
+    A[New Data] -->|BETHUB| B[(MongoDB)]
+    B -->|betup| C[Feature Engineering]
+    C --> D[Model Training]
+    D --> E[Model Evaluation]
+    E -->|Pass| F[Model Artifacts]
+    E -->|Fail| D
+
+    F -->|Version Control| G[Artifact Store]
+    G -->|BETBOT| H[Hot-Swap API]
+    H --> I[Production Inference]
+
+    I -->|Predictions| J[BETTRACKER]
+    J -->|Performance Data| K[Feedback Loop]
+    K -.->|Retrain Signal| D
+
+    style C fill:#e1f5ff
+    style E fill:#fff4e1
+    style H fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>BETHUB Data Collection Pipeline</h2>
+    <div class="description">
+        <strong>Performance:</strong> Async architecture achieves 10x speedup (6 hours → 36 minutes) by running 5 concurrent browser tabs with WebSocket network interception.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph LR
+    A[Scheduler] -->|Triggers| B[Scraper Pool]
+    B -->|5 Concurrent Tabs| C[WebSocket Interceptor]
+    C -->|JSON Extraction| D[Data Validator]
+    D -->|Deduplication| E[MongoDB Writer]
+    E --> F[(MongoDB Collections)]
+
+    style B fill:#e1f5ff
+    style D fill:#fff4e1
+        </div>
+    </div>
+
+    <h2>BETBOT Multi-Model Inference Flow</h2>
+    <div class="description">
+        <strong>Architecture:</strong> Requests are routed to different models based on entity category, with dynamic threshold optimization per prediction.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    A[API Request] --> B[Request Validator]
+    B --> C{Model Router}
+
+    C -->|Category A| D[Model A]
+    C -->|Category B| E[Model B]
+    C -->|Default| F[Model Default]
+
+    D --> G[Feature Extractor]
+    E --> G
+    F --> G
+
+    G --> H[Model Inference]
+    H --> I[Threshold Optimizer]
+    I --> J{Score >= Threshold?}
+
+    J -->|Yes| K[Positive Prediction]
+    J -->|No| L[Negative Prediction]
+
+    K --> M[Response Formatter]
+    L --> M
+    M --> N[API Response]
+
+    style C fill:#fff4e1
+    style I fill:#e1f5ff
+    style M fill:#e1ffe1
+        </div>
+    </div>
+
+    <h2>BETTRACKER Analytics Flow</h2>
+    <div class="description">
+        <strong>Features:</strong> Campaign management, performance tracking, and attribution analysis with feedback loops to training pipeline.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    A[User Login] --> B[JWT Auth]
+    B --> C[Campaign Dashboard]
+
+    C --> D[LIVE Campaigns]
+    C --> E[SIMULATION Campaigns]
+
+    D --> F[Real-time Predictions]
+    E --> G[Historical Backtests]
+
+    F --> H[Performance Tracker]
+    G --> H
+
+    H --> I[Metrics Aggregator]
+    I --> J[ROI Calculator]
+    I --> K[Streak Analyzer]
+    I --> L[Attribution Engine]
+
+    J --> M[Visualizations]
+    K --> M
+    L --> M
+
+    M --> N[User Interface]
+
+    style B fill:#ffe1e1
+    style H fill:#e1f5ff
+    style I fill:#fff4e1
+        </div>
+    </div>
+
+    <h2>MongoDB Collections Schema</h2>
+    <div class="description">
+        <strong>Data Organization:</strong> 10+ collections storing 850K+ match records with reference data for teams, leagues, and betting markets.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    A[(MongoDB)] --> B[games_optimized<br/>850K+ records]
+    A --> C[teams<br/>Reference data]
+    A --> D[countries<br/>Mappings]
+    A --> E[leagues<br/>Hierarchies]
+    A --> F[odds<br/>Market data]
+    A --> G[predictions<br/>Historical]
+    A --> H[performance<br/>Analytics]
+
+    style A fill:#4caf50,color:#fff
+    style B fill:#e1f5ff
+    style G fill:#fff4e1
+    style H fill:#ffe1f5
+        </div>
+    </div>
+
+    <h2>Infrastructure Deployment</h2>
+    <div class="description">
+        <strong>Deployment:</strong> Containerized services with Docker, MongoDB persistence, and horizontal scaling for BETBOT API.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    subgraph "Docker Infrastructure"
+        A[BETHUB Container]
+        B[betup Environment]
+        C[BETBOT Container<br/>4x Uvicorn Workers]
+        D[BETTRACKER Container]
+    end
+
+    E[(MongoDB)]
+
+    A -->|Read/Write| E
+    B -->|Read/Write| E
+    C -->|Read Only| E
+    D -->|Read/Write| E
+
+    F[Model Artifacts] -->|Mount| C
+
+    G[Load Balancer] --> C
+
+    style A fill:#e1f5ff
+    style B fill:#fff4e1
+    style C fill:#e1ffe1
+    style D fill:#ffe1f5
+    style E fill:#4caf50,color:#fff
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                useMaxWidth: true
+            }
+        });
+    </script>
+
+    <style>
+        .copyright-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 12px;
+            z-index: 10000;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+    <div class="copyright-footer">
+        © 2026 BETUP_SCIENTIFIC. All Rights Reserved. | Proprietary and Confidential | Portfolio Demonstration Only
+    </div>
+</body>
+
+</html>

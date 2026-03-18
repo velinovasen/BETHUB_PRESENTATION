@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BETHUB Architecture - Data Collection Service</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 40px;
+            border-left: 4px solid #0066cc;
+            padding-left: 15px;
+        }
+        .diagram-container {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .description {
+            background: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .performance-box {
+            background: #e8f5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+        }
+        .performance-box h3 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .mermaid {
+            text-align: center;
+        }
+        .nav {
+            background: white;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav a {
+            color: #0066cc;
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: 500;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #0066cc;
+            color: white;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="index.html">← Home</a>
+        <a href="bethub_architecture.html">BETHUB</a>
+        <a href="betresearch_architecture.html">BETRESEARCH</a>
+        <a href="betbot_architecture.html">BETBOT API</a>
+        <a href="bettracker_architecture.html">BETTRACKER</a>
+    </div>
+
+    <h1>BETHUB - Data Collection Service Architecture</h1>
+
+    <div class="performance-box">
+        <h3>🚀 Performance Highlights</h3>
+        <p><strong>10x Speedup:</strong> 6 hours → 36 minutes</p>
+        <p><strong>Concurrency:</strong> 5 parallel browser tabs</p>
+        <p><strong>Data Volume:</strong> 850K+ records across 100+ leagues</p>
+        <p><strong>Efficiency:</strong> JSON interception (no HTML parsing)</p>
+    </div>
+
+    <h2>Docker Architecture</h2>
+    <div class="description">
+        <strong>Overview:</strong> BETHUB runs in a containerized environment with Chrome browser automation, async Python workers, and MongoDB connection for data persistence.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    subgraph "Docker Environment"
+        subgraph "BETHUB Container"
+            A[Python 3.10+ Runtime]
+            B[Chrome Browser Pool]
+            C[AsyncIO Event Loop]
+            D[Scraper Workers]
+        end
+
+        subgraph "Chrome Instances"
+            E[Chrome Tab 1]
+            F[Chrome Tab 2]
+            G[Chrome Tab 3]
+            H[Chrome Tab 4]
+            I[Chrome Tab 5]
+        end
+
+        subgraph "Network Layer"
+            J[WebSocket Interceptor]
+            K[CDP Connection Pool]
+        end
+    end
+
+    subgraph "External"
+        L[Web Sources]
+        M[(MongoDB)]
+    end
+
+    A --> C
+    C --> D
+    D --> B
+    B --> E
+    B --> F
+    B --> G
+    B --> H
+    B --> I
+
+    E --> J
+    F --> J
+    G --> J
+    H --> J
+    I --> J
+
+    J --> K
+    K --> L
+
+    D --> M
+
+    style A fill:#e1f5ff
+    style B fill:#fff4e1
+    style C fill:#e1ffe1
+    style D fill:#ffe1f5
+    style M fill:#4caf50,color:#fff
+        </div>
+    </div>
+
+    <h2>Async Scraping Architecture</h2>
+    <div class="description">
+        <strong>Key Innovation:</strong> Chrome DevTools Protocol (CDP) enables direct network interception, capturing JSON responses before HTML rendering. This eliminates parsing overhead and achieves 10x speedup.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+sequenceDiagram
+    participant Scheduler
+    participant AsyncPool
+    participant Chrome1 as Chrome Tab 1
+    participant Chrome2 as Chrome Tab 2
+    participant Chrome5 as Chrome Tab 5
+    participant CDP as CDP Protocol
+    participant WebSource as Web Sources
+    participant Mongo as MongoDB
+
+    Scheduler->>AsyncPool: Schedule 100+ leagues
+
+    par Concurrent Tab 1
+        AsyncPool->>Chrome1: League 1-20
+        Chrome1->>CDP: Enable Network
+        Chrome1->>WebSource: Request data
+        WebSource->>CDP: JSON Response
+        CDP->>Chrome1: Intercept JSON
+        Chrome1->>Mongo: Write matches
+    and Concurrent Tab 2
+        AsyncPool->>Chrome2: League 21-40
+        Chrome2->>CDP: Enable Network
+        Chrome2->>WebSource: Request data
+        WebSource->>CDP: JSON Response
+        CDP->>Chrome2: Intercept JSON
+        Chrome2->>Mongo: Write matches
+    and Concurrent Tab 5
+        AsyncPool->>Chrome5: League 81-100
+        Chrome5->>CDP: Enable Network
+        Chrome5->>WebSource: Request data
+        WebSource->>CDP: JSON Response
+        CDP->>Chrome5: Intercept JSON
+        Chrome5->>Mongo: Write matches
+    end
+
+    Note over AsyncPool,Mongo: All 5 tabs run simultaneously
+    Note over Scheduler,Mongo: Total time: 36 minutes (vs 6 hours sequential)
+        </div>
+    </div>
+
+    <h2>Data Pipeline Flow</h2>
+    <div class="description">
+        <strong>ETL Process:</strong> Extract data via CDP, Transform with validation and deduplication, Load into MongoDB collections with proper indexing.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart LR
+    A[Scheduler] -->|Cron Trigger| B[Async Worker Pool]
+
+    B --> C[Chrome Tab Pool]
+    C --> D[CDP Network Interception]
+
+    D --> E[Raw JSON Data]
+    E --> F[Validation Layer]
+
+    F --> G{Valid Data?}
+    G -->|Yes| H[Deduplication]
+    G -->|No| I[Error Log]
+
+    H --> J{Duplicate?}
+    J -->|No| K[Transform]
+    J -->|Yes| L[Skip]
+
+    K --> M[Enrich Metadata]
+    M --> N[(MongoDB)]
+
+    N --> O[games_optimized]
+    N --> P[teams]
+    N --> Q[leagues]
+    N --> R[odds]
+
+    style B fill:#e1f5ff
+    style D fill:#fff4e1
+    style H fill:#e1ffe1
+    style N fill:#4caf50,color:#fff
+        </div>
+    </div>
+
+    <h2>MongoDB Collections Schema</h2>
+    <div class="description">
+        <strong>Data Organization:</strong> 10+ specialized collections with 850K+ total records. Strategic indexing enables fast queries for BETRESEARCH feature engineering.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph TB
+    subgraph "Core Collections"
+        A[(games_optimized<br/>850K+ matches)]
+        B[(teams<br/>Team reference)]
+        C[(countries<br/>Country mappings)]
+        D[(leagues<br/>League hierarchy)]
+    end
+
+    subgraph "Supporting Collections"
+        E[(odds<br/>Market data)]
+        F[(venues<br/>Stadium info)]
+        G[(players<br/>Player data)]
+    end
+
+    subgraph "Metadata"
+        H[(scrape_logs<br/>ETL tracking)]
+        I[(data_quality<br/>Validation metrics)]
+    end
+
+    A -->|References| B
+    A -->|References| D
+    A -->|References| F
+    D -->|References| C
+    E -->|References| A
+
+    H -->|Monitors| A
+    I -->|Validates| A
+
+    style A fill:#4caf50,color:#fff
+    style B fill:#e1f5ff
+    style D fill:#fff4e1
+    style E fill:#ffe1f5
+        </div>
+    </div>
+
+    <h2>Error Handling & Reliability</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+flowchart TD
+    A[Request] --> B{Success?}
+
+    B -->|Yes| C[Process Data]
+    B -->|No| D{Retry Count < 3?}
+
+    D -->|Yes| E[Exponential Backoff]
+    E -->|Wait 2^n seconds| A
+
+    D -->|No| F[Log Error]
+    F --> G{Critical Error?}
+
+    G -->|Yes| H[Alert Administrator]
+    G -->|No| I[Continue Next Task]
+
+    C --> J[Write to MongoDB]
+    J --> K{Write Success?}
+
+    K -->|Yes| L[Update Metrics]
+    K -->|No| M[Rollback Transaction]
+    M --> F
+
+    style C fill:#e1ffe1
+    style F fill:#ffe1e1
+    style J fill:#e1f5ff
+        </div>
+    </div>
+
+    <h2>Performance Metrics</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Metric</th>
+                <th>Sequential (Old)</th>
+                <th>Async (Current)</th>
+                <th>Improvement</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Total Time</strong></td>
+                <td>6 hours</td>
+                <td>36 minutes</td>
+                <td><strong>10x faster</strong></td>
+            </tr>
+            <tr>
+                <td><strong>Concurrent Workers</strong></td>
+                <td>1</td>
+                <td>5</td>
+                <td>5x parallelism</td>
+            </tr>
+            <tr>
+                <td><strong>Leagues/Hour</strong></td>
+                <td>~17</td>
+                <td>~167</td>
+                <td>10x throughput</td>
+            </tr>
+            <tr>
+                <td><strong>Memory Usage</strong></td>
+                <td>~500 MB</td>
+                <td>~2 GB</td>
+                <td>Trade-off acceptable</td>
+            </tr>
+            <tr>
+                <td><strong>Error Rate</strong></td>
+                <td>~5%</td>
+                <td><2%</td>
+                <td>Better reliability</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Technology Stack</h2>
+    <div class="diagram-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Layer</th>
+                    <th>Technology</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Runtime</strong></td>
+                    <td>Python 3.10+</td>
+                    <td>Async/await, type hints</td>
+                </tr>
+                <tr>
+                    <td><strong>Async</strong></td>
+                    <td>AsyncIO, aiohttp</td>
+                    <td>Concurrent operations</td>
+                </tr>
+                <tr>
+                    <td><strong>Browser</strong></td>
+                    <td>Chrome DevTools Protocol</td>
+                    <td>Network interception</td>
+                </tr>
+                <tr>
+                    <td><strong>Database</strong></td>
+                    <td>MongoDB, PyMongo, Motor</td>
+                    <td>Document storage, async I/O</td>
+                </tr>
+                <tr>
+                    <td><strong>Scheduling</strong></td>
+                    <td>Cron, APScheduler</td>
+                    <td>Automated scraping</td>
+                </tr>
+                <tr>
+                    <td><strong>Container</strong></td>
+                    <td>Docker, Docker Compose</td>
+                    <td>Deployment, isolation</td>
+                </tr>
+                <tr>
+                    <td><strong>Validation</strong></td>
+                    <td>Pydantic</td>
+                    <td>Data schemas, type safety</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Docker Compose Configuration</h2>
+    <div class="description">
+        <strong>Deployment:</strong> Single docker-compose.yml orchestrates BETHUB container with MongoDB service, volume mounts, and network configuration.
+    </div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph LR
+    A[docker-compose.yml] --> B[BETHUB Service]
+    A --> C[MongoDB Service]
+
+    B --> D[Volume: /app/logs]
+    B --> E[Volume: /app/config]
+    B --> F[Network: bethub-net]
+
+    C --> G[Volume: /data/db]
+    C --> F
+
+    F --> H{Internal Network}
+    H --> I[Service Discovery]
+
+    style A fill:#e1f5ff
+    style B fill:#fff4e1
+    style C fill:#4caf50,color:#fff
+        </div>
+    </div>
+
+    <h2>Key Features</h2>
+    <div class="performance-box">
+        <h3>✨ BETHUB Capabilities</h3>
+        <ul style="line-height: 1.8;">
+            <li><strong>10x Performance</strong> - Async architecture with 5 concurrent tabs</li>
+            <li><strong>Smart Interception</strong> - CDP captures JSON, no HTML parsing needed</li>
+            <li><strong>Robust Error Handling</strong> - Exponential backoff with retry logic</li>
+            <li><strong>Deduplication</strong> - Prevents duplicate records in MongoDB</li>
+            <li><strong>League Aliasing</strong> - Handles multiple names for same league</li>
+            <li><strong>Temporal Ordering</strong> - Maintains chronological data integrity</li>
+            <li><strong>Scalable</strong> - Docker deployment for easy replication</li>
+            <li><strong>Monitored</strong> - Comprehensive logging and metrics</li>
+        </ul>
+    </div>
+
+    <style>
+        .copyright-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 12px;
+            z-index: 10000;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+    <div class="copyright-footer">
+        © 2026 BETUP_SCIENTIFIC. All Rights Reserved. | Proprietary and Confidential | Portfolio Demonstration Only
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                useMaxWidth: true
+            }
+        });
+    </script>
+</body>
+</html>
