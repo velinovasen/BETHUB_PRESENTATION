@@ -18,7 +18,7 @@
 
 ## 👔 For Technical Recruiters
 
-**Evaluating this candidate? Start here for a 5-minute technical assessment.**
+**Evaluating this candidate? Start here for a 5-minute technical assessment.
 
 ### What This Project Demonstrates
 
@@ -32,6 +32,8 @@
 | **Mathematics** | Statistics, optimization, algorithm design | Walk-forward validation, threshold optimization |
 
 ### Quick Evaluation Guide
+
+### At https://www.betup.cash/docs with code XK73N9P2 you can have the full experience with visualizations
 
 **⏱️ 2 Minutes - Core Competency Check:**
 1. Browse `docs/methodology.md` - Demonstrates understanding of temporal validation
