@@ -39,6 +39,36 @@ Traditional backtesting suffers from **look-ahead bias** - using future data to 
 
 ---
 
+## 🎨 Best Viewing Experience
+
+**For the best interactive experience with architecture visualizations:**
+
+1. **Download this repository** (or clone it):
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/REPO_NAME.git
+   cd REPO_NAME
+   ```
+
+2. **Open the visualization index** in your browser:
+   ```bash
+   open visualizations/index.html
+   # or on Windows: start visualizations/index.html
+   # or on Linux: xdg-open visualizations/index.html
+   ```
+
+3. **Explore 7 interactive pages** with detailed Mermaid diagrams:
+   - System Architecture Overview
+   - Walk-Forward Validation Methodology
+   - Data Flow & Pipelines
+   - BETHUB (Data Collection)
+   - BETRESEARCH (Training Platform)
+   - BETBOT (API Service)
+   - BETTRACKER (Analytics)
+
+> **Note:** While Mermaid diagrams render in GitHub's markdown viewer, the dedicated HTML visualizations provide a superior experience with enhanced styling, navigation, and interactivity.
+
+---
+
 ## 🏗️ System Architecture
 
 <div align="center">

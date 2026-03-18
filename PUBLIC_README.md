@@ -8,6 +8,35 @@ This project showcases a complete **4-service distributed architecture** for rea
 
 **Key Innovation**: Walk-forward validation framework with dynamic threshold optimization achieving **1,200% ROI** on production deployment across top performing markets (3,206 games, 42.15% accuracy with highly selective 11.32% prediction rate).
 
+---
+
+## 🎨 Best Viewing Experience
+
+**To explore the interactive architecture visualizations:**
+
+1. **Clone or download this repository**:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/REPO_NAME.git
+   ```
+
+2. **Open the visualization portal**:
+   ```bash
+   open visualizations/index.html
+   ```
+
+3. **Navigate through 7 detailed architecture pages**:
+   - 📊 System Architecture - Complete 4-service overview
+   - 🎯 Walk-Forward Validation - Core methodology
+   - 🔄 Data Flow & Pipelines - End-to-end processes
+   - 🌐 BETHUB - Async data collection
+   - 🔬 BETRESEARCH - Feature engineering & training
+   - ⚡ BETBOT - Production API service
+   - 📊 BETTRACKER - Analytics platform
+
+> **Why download?** The HTML visualizations provide interactive Mermaid diagrams with enhanced styling and navigation that work best when opened locally.
+
+---
+
 ## System Architecture
 
 ```mermaid
